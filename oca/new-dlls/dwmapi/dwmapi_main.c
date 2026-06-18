@@ -53,7 +53,7 @@ typedef struct DWM_COLORIZATION_PARAMS {
  */
 HRESULT WINAPI DwmIsCompositionEnabled(BOOL *enabled)
 {
-    RTL_OSVERSIONINFOW version;
+    //RTL_OSVERSIONINFOW version;
 
     TRACE("%p\n", enabled);
 
@@ -61,11 +61,11 @@ HRESULT WINAPI DwmIsCompositionEnabled(BOOL *enabled)
         return E_INVALIDARG;
 
     *enabled = FALSE;
-    version.dwOSVersionInfoSize = sizeof(version);
-    if (!RtlGetVersion(&version))
-        *enabled = (version.dwMajorVersion > 6 || (version.dwMajorVersion == 6 && version.dwMinorVersion >= 3));
+    // version.dwOSVersionInfoSize = sizeof(version);
+    // if (!RtlGetVersion(&version))
+        // *enabled = (version.dwMajorVersion > 6 || (version.dwMajorVersion == 6 && version.dwMinorVersion >= 3));
 
-    return S_OK;
+    return DWM_E_COMPOSITIONDISABLED;
 }
 
 /**********************************************************************
@@ -91,12 +91,12 @@ HRESULT WINAPI DwmExtendFrameIntoClientArea(HWND hwnd, const MARGINS* margins)
 {
     //FIXME("(%p, %p) stub\n", hwnd, margins);
 
-	BOOL isCompositionEnabled;
-	DwmIsCompositionEnabled(&isCompositionEnabled);
+	// BOOL isCompositionEnabled;
+	// DwmIsCompositionEnabled(&isCompositionEnabled);
 	
-	if (isCompositionEnabled) 
-		return S_OK;
-	else 
+	// if (isCompositionEnabled) 
+		// return S_OK;
+	// else 
 		return DWM_E_COMPOSITIONDISABLED;
 }
 
