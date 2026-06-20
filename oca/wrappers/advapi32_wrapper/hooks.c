@@ -297,6 +297,7 @@ static LPWSTR SERV_dup( LPCSTR str )
     return wstr;
 }
 
+// Now includes: preliminary support for Psuedo Handles! (for Most Go applications)
 BOOL
 APIENTRY
 GetTokenInformationInternal (
@@ -313,12 +314,34 @@ GetTokenInformationInternal (
     DWORD dwReturnLength = *ReturnLength;
     int i, index=0;
 	char* ptr;
+	BOOL result = FALSE;
+	BOOL isPsuedoHandle = FALSE;
+	
+	if (TokenHandle == (ULONG_PTR)-4) {
+		// GetCurrentProcessToken() is called.
+		isPsuedoHandle = TRUE;
+		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_QUERY_SOURCE, &TokenHandle))
+			return FALSE;
+	} else if (TokenHandle == (ULONG_PTR)-5) {
+		// GetCurrentThreadToken() is called.
+		isPsuedoHandle = TRUE;
+		if (!OpenThreadToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_QUERY_SOURCE, TRUE, &TokenHandle))
+			return FALSE;
+	} else if (TokenHandle == (ULONG_PTR)-6) {
+		// GetCurrentThreadEffectiveToken() is called.
+		isPsuedoHandle = TRUE;
+		if (!OpenThreadToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_QUERY_SOURCE, TRUE, &TokenHandle)) {
+			if (GetLastError() != ERROR_NO_TOKEN || !OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_QUERY_SOURCE, &TokenHandle))
+				return FALSE;
+		}
+	}
 	
     if(TokenInformationClass == TokenLogonSid){
 		if (TokenInformationLength == 0) { // Chrome 98+ sandbox needs this.
 			*ReturnLength = sizeof(TOKEN_GROUPS) + sizeof(PVOID) + sizeof(DWORD) + SECURITY_MAX_SID_SIZE;
-			return FALSE;
+			goto cleanup;
 		}		
+		
         Status = NtQueryInformationToken(TokenHandle,
                                          TokenGroups,
                                          0,
@@ -337,7 +360,7 @@ GetTokenInformationInternal (
 		if (Status != 0) {
 				RtlFreeHeap(RtlGetProcessHeap(), 0, GroupBuffer);
 				RtlSetLastWin32ErrorAndNtStatusFromNtStatus(Status);
-				return FALSE;
+				goto cleanup;
 		}		
 		
         // Return it.
@@ -363,22 +386,25 @@ GetTokenInformationInternal (
 		*ReturnLength = sizeof(TOKEN_GROUPS) + sizeof(PVOID) + sizeof(DWORD) + SECURITY_MAX_SID_SIZE;
         // Free temp buffer.
         RtlFreeHeap(RtlGetProcessHeap(), 0, GroupBuffer);
-        return TRUE;
+		result = TRUE;
+		goto cleanup;
     }
 	
     if(TokenInformationClass == TokenAppContainerSid){
         //Firefox 153 and higher needs this.
         *ReturnLength = sizeof(TOKEN_APPCONTAINER_INFORMATION);
         if(TokenInformationLength < sizeof(TOKEN_APPCONTAINER_INFORMATION))
-           return FALSE;
+			goto cleanup;
         ((PTOKEN_APPCONTAINER_INFORMATION)TokenInformation)->TokenAppContainer = NULL;
-        return TRUE;
+        result = TRUE;
+		goto cleanup;
     }
 	
 	if(TokenInformationClass == TokenElevationType ){
 		(PULONG)TokenInformation = (PVOID)2;
 		TokenInformationLength = sizeof(ULONG);
-		return TRUE;
+		result = TRUE;
+		goto cleanup;
 	}	
 	
     if(TokenInformationClass == TokenIntegrityLevel || 
@@ -397,11 +423,11 @@ GetTokenInformationInternal (
         {
             //DbgPrint("GetTokenInformationInternal:: NtQueryInformationToken returned Status: 0x%08lx\n", Status);
             SetLastError(RtlNtStatusToDosError(Status));
-            return FALSE;
+            goto cleanup;
         }
         
-        
-        return TRUE;
+        result = TRUE;
+		goto cleanup;
     }
 
     Status = NtQueryInformationToken(TokenHandle,
@@ -412,10 +438,15 @@ GetTokenInformationInternal (
     if (!NT_SUCCESS(Status))
     {
         SetLastError(RtlNtStatusToDosError(Status));
-        return FALSE;
+        goto cleanup;
     }
-
-    return TRUE;
+	
+	result = TRUE;
+cleanup:
+	if (isPsuedoHandle)
+		CloseHandle(TokenHandle);
+	
+	return result;
 }
 
 BOOL
@@ -428,6 +459,11 @@ SetTokenInformationInternal (
     )
 { 
     NTSTATUS Status;
+	
+	if (TokenHandle == ((ULONG_PTR)-4) || TokenHandle == ((ULONG_PTR)-5) || TokenHandle == ((ULONG_PTR)-6)) {
+		DbgPrint("SetTokenInformationInternal:: unsupported on Win8 pseudo-handle functions. Unexpected behavior can happen... returning TRUE.");
+		return TRUE;
+	}
 	
     if(TokenInformationClass == TokenIntegrityLevel || 
        TokenInformationClass == TokenElevationType || 
