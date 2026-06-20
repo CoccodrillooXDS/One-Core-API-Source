@@ -207,7 +207,7 @@ GetUserObjectSecurityInternal(
     return TRUE;
 }
 
-UINT WINAPI MapVirtualKeyExW_Wrap(UINT uCode, UINT uMapType, HKL dwhkl) {
+UINT WINAPI MapVirtualKeyExWHook(UINT uCode, UINT uMapType, HKL dwhkl) {
     UINT result;
     
     if (uMapType == 3) {
@@ -224,7 +224,7 @@ UINT WINAPI MapVirtualKeyExW_Wrap(UINT uCode, UINT uMapType, HKL dwhkl) {
     return MapVirtualKeyExW(uCode, uMapType, dwhkl);
 }
 
-UINT WINAPI MapVirtualKeyExA_Wrap(UINT uCode, UINT uMapType, HKL dwhkl) {
+UINT WINAPI MapVirtualKeyExAHook(UINT uCode, UINT uMapType, HKL dwhkl) {
     UINT result;
     
     if (uMapType == 3) {
@@ -241,10 +241,10 @@ UINT WINAPI MapVirtualKeyExA_Wrap(UINT uCode, UINT uMapType, HKL dwhkl) {
     return MapVirtualKeyExA(uCode, uMapType, dwhkl);
 }
 
-UINT WINAPI MapVirtualKeyA_Wrap(UINT uCode, UINT uMapType) {
-    return MapVirtualKeyExA_Wrap(uCode, uMapType, NULL);
+UINT WINAPI MapVirtualKeyAHook(UINT uCode, UINT uMapType) {
+    return MapVirtualKeyExAHook(uCode, uMapType, NULL);
 }
 
-UINT WINAPI MapVirtualKeyW_Wrap(UINT uCode, UINT uMapType) {
-    return MapVirtualKeyExW_Wrap(uCode, uMapType, NULL);
+UINT WINAPI MapVirtualKeyWHook(UINT uCode, UINT uMapType) {
+    return MapVirtualKeyExWHook(uCode, uMapType, NULL);
 }

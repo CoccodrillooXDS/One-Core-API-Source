@@ -724,84 +724,63 @@ UINT WINAPI PrivateExtractIconsAHook (
  * NOTES
  *  if nIndex == -1 it returns the number of icons in any case !!!
  */
-UINT WINAPI PrivateExtractIconExWHook (
-	LPCWSTR lpwstrFile,
-	int nIndex,
-	HICON * phIconLarge,
-	HICON * phIconSmall,
-	UINT nIcons )
+ UINT WINAPI  PrivateExtractIconExWHook(
+    LPCWSTR szFileName,
+    int     nIconIndex,
+    HICON   *phiconLarge,
+    HICON   *phiconSmall,
+    UINT    nIcons)
 {
-	DWORD cyicon, cysmicon, cxicon, cxsmicon;
-	UINT ret = 0;
+    UINT result = 0;
 
-	TRACE("%s %d %p %p %d\n",
-	debugstr_w(lpwstrFile),nIndex,phIconLarge, phIconSmall, nIcons);	
-   
-    if(IsNativePNGConversor){
-         DbgPrint("PrivateExtractIconExWHook:: resp: %d\n", ret);
-         return PrivateExtractIconExW(lpwstrFile, nIndex, phIconLarge, phIconSmall, nIcons);
-    }	
+    if ((nIconIndex == -1) || ((phiconLarge == NULL) && (phiconSmall == NULL)))
+        return PrivateExtractIconsWHook(szFileName, 0, 0, 0, NULL, NULL, 0, 0);
 
-#ifdef __REACTOS__
-    if (nIndex == -1 || (!phIconSmall && !phIconLarge))
-      /* get the number of icons */
-      return ICO_ExtractIconExW(lpwstrFile, NULL, 0, 0, 0, 0, NULL,
-                                LR_DEFAULTCOLOR, FALSE);
-#else
-	if (nIndex == -1)
-	  /* get the number of icons */
-	  return ICO_ExtractIconExW(lpwstrFile, NULL, 0, 0, 0, 0, NULL, LR_DEFAULTCOLOR);
-#endif
+    if (phiconLarge && phiconSmall && (nIcons == 1)) {
 
-	if (nIcons == 1 && phIconSmall && phIconLarge)
-	{
-	  HICON hIcon[2];
-	  cxicon = GetSystemMetrics(SM_CXICON);
-	  cyicon = GetSystemMetrics(SM_CYICON);
-	  cxsmicon = GetSystemMetrics(SM_CXSMICON);
-	  cysmicon = GetSystemMetrics(SM_CYSMICON);
+        HICON ahicon[2];
 
-#ifdef __REACTOS__
-      ret = ICO_ExtractIconExW(lpwstrFile, hIcon, nIndex, 2,
-                               cxicon | (cxsmicon<<16),
-                               cyicon | (cysmicon<<16), NULL,
-                               LR_DEFAULTCOLOR, FALSE);
-#else
-          ret = ICO_ExtractIconExW(lpwstrFile, hIcon, nIndex, 2, cxicon | (cxsmicon<<16),
-	                           cyicon | (cysmicon<<16), NULL, LR_DEFAULTCOLOR);
-#endif
-	  *phIconLarge = hIcon[0];
-	  *phIconSmall = hIcon[1];
- 	  return ret;
-	}
+        ahicon[0] = NULL;
+        ahicon[1] = NULL;
 
-	if (phIconSmall)
-	{
-	  /* extract n small icons */
-	  cxsmicon = GetSystemMetrics(SM_CXSMICON);
-	  cysmicon = GetSystemMetrics(SM_CYSMICON);
-#ifdef __REACTOS__
-      ret = ICO_ExtractIconExW(lpwstrFile, phIconSmall, nIndex, nIcons, cxsmicon,
-                               cysmicon, NULL, LR_DEFAULTCOLOR, FALSE);
-#else
-	  ret = ICO_ExtractIconExW(lpwstrFile, phIconSmall, nIndex, nIcons, cxsmicon,
-	                           cysmicon, NULL, LR_DEFAULTCOLOR);
-#endif
-	}
-       if (phIconLarge)
-	{
-	  /* extract n large icons */
-	  cxicon = GetSystemMetrics(SM_CXICON);
-	  cyicon = GetSystemMetrics(SM_CYICON);
-#ifdef __REACTOS__
-       ret = ICO_ExtractIconExW(lpwstrFile, phIconLarge, nIndex, nIcons, cxicon,
-                                cyicon, NULL, LR_DEFAULTCOLOR, FALSE);
-#else
-         ret = ICO_ExtractIconExW(lpwstrFile, phIconLarge, nIndex, nIcons, cxicon,
-	                           cyicon, NULL, LR_DEFAULTCOLOR);
-#endif
-	}
-	return ret;
+        result = PrivateExtractIconsWHook(szFileName,
+                                      nIconIndex,
+                                      MAKELONG(GetSystemMetrics(SM_CXICON),
+                                               GetSystemMetrics(SM_CXSMICON)),
+                                      MAKELONG(GetSystemMetrics(SM_CYICON),
+                                               GetSystemMetrics(SM_CYSMICON)),
+                                      ahicon,
+                                      NULL,
+                                      2,
+                                      0);
+
+        *phiconLarge = ahicon[0];
+        *phiconSmall = ahicon[1];
+
+    } else {
+
+        if (phiconLarge)
+            result = PrivateExtractIconsWHook(szFileName,
+                                          nIconIndex,
+                                          GetSystemMetrics(SM_CXICON),
+                                          GetSystemMetrics(SM_CYICON),
+                                          phiconLarge,
+                                          NULL,
+                                          nIcons,
+                                          0);
+
+        if (phiconSmall)
+            result = PrivateExtractIconsWHook(szFileName,
+                                          nIconIndex,
+                                          GetSystemMetrics(SM_CXSMICON),
+                                          GetSystemMetrics(SM_CYSMICON),
+                                          phiconSmall,
+                                          NULL,
+                                          nIcons,
+                                          0);
+    }
+
+    return result;
 }
 
 /***********************************************************************
