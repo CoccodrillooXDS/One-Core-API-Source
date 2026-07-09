@@ -744,10 +744,10 @@
 @ stdcall LoadIconW(long wstr) LoadIconWHook
 @ stdcall LoadImageA(long str long long long long) LoadImageAHook
 @ stdcall LoadImageW(long wstr long long long long) LoadImageWHook
-@ stdcall MapVirtualKeyA(long long) MapVirtualKeyA_Wrap
-@ stdcall MapVirtualKeyExA(long long long) MapVirtualKeyExA_Wrap
-@ stdcall MapVirtualKeyExW(long long long) MapVirtualKeyExW_Wrap
-@ stdcall MapVirtualKeyW(long long) MapVirtualKeyW_Wrap
+@ stdcall MapVirtualKeyA(long long) MapVirtualKeyAHook
+@ stdcall MapVirtualKeyExA(long long long) MapVirtualKeyExAHook
+@ stdcall MapVirtualKeyExW(long long long) MapVirtualKeyExWHook
+@ stdcall MapVirtualKeyW(long long) MapVirtualKeyWHook
 @ stdcall PrivateExtractIconExA(str long ptr ptr long) PrivateExtractIconExAHook
 @ stdcall PrivateExtractIconExW(wstr long ptr ptr long) PrivateExtractIconExWHook
 @ stdcall PrivateExtractIconsA(str long long long ptr ptr long long) PrivateExtractIconsAHook
