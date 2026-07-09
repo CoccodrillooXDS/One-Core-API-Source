@@ -1071,3 +1071,98 @@ NTSTATUS WINAPI D3DKMTConfigureSharedResource(
 NTSTATUS WINAPI D3DKMTOpenSynchronizationObject(D3DKMT_OPENSYNCHRONIZATIONOBJECT *desc) {
 	return STATUS_ACCESS_DENIED;
 }
+
+NTSTATUS
+WINAPI
+D3DKMTInvalidateActiveVidPn(
+    const D3DKMT_INVALIDATEACTIVEVIDPN *desc
+)
+{
+    TRACE("D3DKMTInvalidateActiveVidPn(%p)\n", desc);
+
+    if (!desc)
+        return STATUS_INVALID_PARAMETER;
+
+    SendMessageTimeoutW(HWND_BROADCAST,
+                        WM_DISPLAYCHANGE,
+                        0,
+                        0,
+                        SMTO_ABORTIFHUNG,
+                        100,
+                        NULL);
+
+    return STATUS_SUCCESS;
+}
+
+
+
+NTSTATUS
+WINAPI
+D3DKMTPollDisplayChildren(
+    const D3DKMT_POLLDISPLAYCHILDREN *desc
+)
+{
+    TRACE("D3DKMTPollDisplayChildren(%p)\n", desc);
+
+    if (!desc)
+        return STATUS_INVALID_PARAMETER;
+
+    return STATUS_SUCCESS;
+}
+
+
+
+NTSTATUS
+WINAPI
+D3DKMTEnumAdapters2(
+    _Inout_ D3DKMT_ENUMADAPTERS2 *pData
+)
+{
+    // DISPLAY_DEVICEW DisplayDevice = { 0 };
+    // UINT Index = 0;
+    // UINT Count = 0;
+
+    TRACE("D3DKMTEnumAdapters2(%p)\n", pData);
+
+    // if (!pData)
+        // return STATUS_INVALID_PARAMETER;
+
+    // if (pData->NumAdapters == 0 || pData->pAdapters == NULL)
+    // {
+        // while (EnumDisplayDevicesW(NULL, Index, &DisplayDevice, 0))
+        // {
+            // if (!(DisplayDevice.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER))
+                // Count++;
+            // Index++;
+        // }
+        // pData->NumAdapters = Count;
+        // return STATUS_SUCCESS;
+    // }
+
+    // Count = 0;
+    // Index = 0;
+    // while (Count < pData->NumAdapters)
+    // {
+        // ZeroMemory(&DisplayDevice, sizeof(DisplayDevice));
+        // DisplayDevice.cb = sizeof(DisplayDevice);
+
+        // if (!EnumDisplayDevicesW(NULL, Index, &DisplayDevice, 0))
+            // break;
+
+        // if (DisplayDevice.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER)
+        // {
+            // Index++;
+            // continue;
+        // }
+
+        // pData->pAdapters[Count].hAdapter = (D3DKMT_HANDLE)(Count + 1);
+        // pData->pAdapters[Count].AdapterLuid.LowPart  = Count + 1;
+        // pData->pAdapters[Count].AdapterLuid.HighPart = 0;
+
+        // Count++;
+        // Index++;
+    // }
+
+    pData->NumAdapters = 0;
+    return STATUS_SUCCESS;
+}

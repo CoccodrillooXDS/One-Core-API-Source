@@ -612,18 +612,14 @@
 @ stdcall D3DKMTCheckExclusiveOwnership()
 @ stdcall D3DKMTCheckMonitorPowerState(ptr)
 @ stdcall D3DKMTCheckOcclusion(ptr)
+@ stdcall D3DKMTInvalidateActiveVidPn(ptr)
+@ stdcall D3DKMTPollDisplayChildren(ptr)
 @ stdcall D3DKMTCheckSharedResourceAccess(ptr)
 @ stdcall D3DKMTCheckVidPnExclusiveOwnership(ptr)
-#@ stdcall D3DKMTCloseAdapter(ptr)
 @ stdcall D3DKMTCreateDCFromMemory(ptr)
-#@ stdcall D3DKMTCreateDevice(ptr)
 @ stdcall D3DKMTDestroyDCFromMemory(ptr)
-#@ stdcall D3DKMTDestroyDevice(ptr)
-#@ stdcall D3DKMTEscape(ptr)
-#@ stdcall D3DKMTGetDisplayModeList(ptr)
 @ stdcall D3DKMTGetProcessSchedulingPriorityClass(ptr ptr)
 @ stdcall D3DKMTGetScanLine(ptr)
-#@ stdcall D3DKMTOpenAdapterFromGdiDisplayName(ptr)
 @ stdcall D3DKMTOpenAdapterFromHdc(ptr)
 @ stdcall D3DKMTOpenAdapterFromLuid(ptr)
 @ stdcall D3DKMTQueryStatistics(ptr)
@@ -633,17 +629,10 @@
 @ stdcall D3DKMTSharedPrimaryUnLockNotification(ptr)
 @ stdcall D3DKMTSetQueuedLimit(ptr)
 @ stdcall D3DKMTSetProcessSchedulingPriorityClass(long long)
-#@ stdcall D3DKMTSetVidPnSourceOwner(ptr)
 @ stub LoadImageColorMatcherA
-@ stub LoadImageColorMatcherW 
+@ stub LoadImageColorMatcherW
 
-@ stdcall D3DKMTAcquireKeyedMutex(ptr)
-@ stdcall D3DKMTCreateKeyedMutex(ptr)
-@ stdcall D3DKMTDestroyKeyedMutex(ptr)
-@ stdcall D3DKMTReleaseKeyedMutex(ptr)
-@ stdcall D3DKMTOpenKeyedMutex(ptr)
-
-#Fowarded to d3dkmt ()
+#Fowarded to d3dkmt
 @ stdcall D3DKMTCloseAdapter(ptr) d3dkmt.D3DKMTCloseAdapter
 @ stdcall D3DKMTConfigureSharedResource(ptr)
 @ stdcall D3DKMTCreateAllocation(ptr) d3dkmt.D3DKMTCreateAllocation
@@ -692,9 +681,17 @@
 
 #Win7 functions
 @ stdcall BeginGdiRendering(long long) NtGdiBeginGdiRendering
+@ stdcall D3DKMTAcquireKeyedMutex(ptr)
+@ stdcall D3DKMTCreateKeyedMutex(ptr)
+@ stdcall D3DKMTDestroyKeyedMutex(ptr)
+@ stdcall D3DKMTReleaseKeyedMutex(ptr)
+@ stdcall D3DKMTOpenKeyedMutex(ptr)
 @ stdcall EndGdiRendering(long long ptr) NtGdiEndGdiRendering
 @ stdcall CreateBitmapFromDxSurface(long long long long ptr)
 @ stdcall GetFontFileData(long long int64 ptr long)
 @ stdcall GetFontFileInfo(long long ptr long long) ;gdibase.GetFontFileInfo
 @ stdcall GetFontRealizationInfo(long ptr) ;GdiRealizationInfo
 @ stdcall GdiGetBitmapBitsSize(ptr) #please, be careful with this function!
+
+#Win8 functions
+@ stdcall D3DKMTEnumAdapters2(ptr)
