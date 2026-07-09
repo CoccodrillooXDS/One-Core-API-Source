@@ -317,17 +317,17 @@ GetTokenInformationInternal (
 	BOOL result = FALSE;
 	BOOL isPsuedoHandle = FALSE;
 	
-	if (TokenHandle == (ULONG_PTR)-4) {
+	if (TokenHandle == (HANDLE)(ULONG_PTR)-4) {
 		// GetCurrentProcessToken() is called.
 		isPsuedoHandle = TRUE;
 		if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_QUERY_SOURCE, &TokenHandle))
 			return FALSE;
-	} else if (TokenHandle == (ULONG_PTR)-5) {
+	} else if (TokenHandle == (HANDLE)(ULONG_PTR)-5) {
 		// GetCurrentThreadToken() is called.
 		isPsuedoHandle = TRUE;
 		if (!OpenThreadToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_QUERY_SOURCE, TRUE, &TokenHandle))
 			return FALSE;
-	} else if (TokenHandle == (ULONG_PTR)-6) {
+	} else if (TokenHandle == (HANDLE)(ULONG_PTR)-6) {
 		// GetCurrentThreadEffectiveToken() is called.
 		isPsuedoHandle = TRUE;
 		if (!OpenThreadToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_QUERY_SOURCE, TRUE, &TokenHandle)) {
@@ -460,7 +460,7 @@ SetTokenInformationInternal (
 { 
     NTSTATUS Status;
 	
-	if (TokenHandle == ((ULONG_PTR)-4) || TokenHandle == ((ULONG_PTR)-5) || TokenHandle == ((ULONG_PTR)-6)) {
+	if (TokenHandle == ((HANDLE)(ULONG_PTR)-4) || TokenHandle == ((HANDLE)(ULONG_PTR)-5) || TokenHandle == ((HANDLE)(ULONG_PTR)-6)) {
 		DbgPrint("SetTokenInformationInternal:: unsupported on Win8 pseudo-handle functions. Unexpected behavior can happen... returning TRUE.");
 		return TRUE;
 	}
