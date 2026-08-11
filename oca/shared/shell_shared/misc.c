@@ -114,18 +114,26 @@ SHFormatForDisplay(
 	return PSFormatForDisplay(propkey, propvar, pdfFlags, pwszText, cchText);
 }
 
-HRESULT 
-WINAPI 
+HRESULT
+WINAPI
 SHOpenWithDialog(
   _In_opt_  HWND hwnd,
   _In_ const OPENASINFO *poainfo
 )
 {
-	LPCWSTR strCmd= L"shell32.dll,OpenAs_RunDLL ";
-	StrCatW(strCmd, poainfo->pcszFile);
+	/* real buffer - strCmd was a read-only string literal being written into */
+	WCHAR strCmd[MAX_PATH];
+
+	if (!poainfo || !poainfo->pcszFile)
+		return E_INVALIDARG;
+
+	if (FAILED(StringCchCopyW(strCmd, ARRAY_SIZE(strCmd),
+	                          L"shell32.dll,OpenAs_RunDLL ")) ||
+	    FAILED(StringCchCatW(strCmd, ARRAY_SIZE(strCmd), poainfo->pcszFile)))
+		return HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
 
 	ShellExecuteW(hwnd,
-				  L"open", 
+				  L"open",
 				  L"Rundll32.exe",
 				  strCmd,
 				  NULL,
